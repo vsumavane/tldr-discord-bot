@@ -134,31 +134,30 @@ async function checkAndPostCategory(category, dateStr) {
   }
 }
 
-export default async function handler(req, res) {
+async function main() {
   Logger.info('Starting TLDR Discord Bot execution.');
   const dateStr = getTodayDateSF();
   Logger.info(`Date string result (SF time): ${dateStr}`);
   Logger.info(`Checking if today is a weekend.`);
   if (!dateStr) {
     Logger.info("Weekend – no newsletters to post.");
-    return res.status(200).send("Weekend – no newsletters.");
+    return;
   }
 
-  const postedCategories = await getPostedCategories(dateStr); // Pass dateStr here
+  const postedCategories = await getPostedCategories(dateStr);
   Logger.info(`Fetched already posted categories: ${JSON.stringify(postedCategories)}`);
-  // The filtering logic below is now simpler since getPostedCategories already filters by date
   const categoriesToCheck = Object.keys(CATEGORY_CONFIG).filter(
     category => !postedCategories.includes(category)
   );
 
   if (categoriesToCheck.length === 0) {
     Logger.info("All categories for today have been posted.");
-    return res.status(200).send("All categories for today have been posted.");
+    return;
   }
   Logger.info(`Categories to check today: ${JSON.stringify(categoriesToCheck)}`);
 
   let totalPosted = 0;
-  let successfullyPostedCategoriesCount = 0; // Track categories where at least one article was posted
+  let successfullyPostedCategoriesCount = 0;
   for (const category of categoriesToCheck) {
     const postedCount = await checkAndPostCategory(category, dateStr);
     totalPosted += postedCount;
@@ -168,26 +167,12 @@ export default async function handler(req, res) {
   }
 
   Logger.info(`Total new TLDR articles posted today: ${totalPosted}.`);
-  const categoriesPending = categoriesToCheck.length - successfullyPostedCategoriesCount; // Correct calculation
-  res.status(200).send(`Posted ${totalPosted} new TLDR articles. ${categoriesPending} categories still pending.`);
+  const categoriesPending = categoriesToCheck.length - successfullyPostedCategoriesCount;
+  Logger.info(`Posted ${totalPosted} new TLDR articles. ${categoriesPending} categories still pending.`);
 }
 
-// This block allows the handler to be called when the script is run directly in an ES module context
-if (process.env.NODE_ENV !== 'production' && import.meta.url === `file://${process.argv[1]}`) {
-  Logger.info('Running handler locally.');
-  // Create mock request and response objects for local execution
-  const mockReq = {};
-  const mockRes = {
-    status: (statusCode) => {
-      console.log(`Response status: ${statusCode}`);
-      return mockRes; // Allow chaining
-    },
-    send: (message) => {
-      console.log(`Response sent: ${message}`);
-    }
-  };
-
-  handler(mockReq, mockRes).catch(error => {
-    Logger.error('Error during local handler execution:', error);
-  });
-}
+// Run the main function
+main().catch(error => {
+  Logger.error('Error during script execution:', error);
+  process.exit(1);
+});
