@@ -1,9 +1,26 @@
-export function getTodayDateIST() {
+export function getTodayDateSF() {
   const now = new Date();
-  now.setUTCHours(now.getUTCHours() + 5.5);
-  const day = now.getUTCDay();
-  if (day === 0 || day === 6) return null; // Weekend
-  return now.toISOString().slice(0, 10);
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Los_Angeles',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'long'
+  });
+
+  const parts = formatter.formatToParts(now);
+  const year = parts.find(p => p.type === 'year').value;
+  const month = parts.find(p => p.type === 'month').value;
+  const dayOfMonth = parts.find(p => p.type === 'day').value;
+  const weekday = parts.find(p => p.type === 'weekday').value;
+
+  // Check if weekend based on SF time
+  if (weekday === 'Saturday' || weekday === 'Sunday') {
+    return null;
+  }
+
+  // Format as YYYY-MM-DD
+  return `${year}-${month}-${dayOfMonth}`;
 }
 
 export function cleanUrl(url) {
@@ -35,4 +52,8 @@ export function formatSummary(summary) {
   const sentences = summary.match(/[^.!?]+[.!?]+/g) || [];
   const limitedSentences = sentences.slice(0, 5);
   return limitedSentences.join(' ').trim();
+}
+
+export async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 } 

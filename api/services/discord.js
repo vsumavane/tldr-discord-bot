@@ -1,7 +1,7 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import { CATEGORY_CONFIG, DISCORD_COLORS } from '../config.js';
-import { cleanUrl, extractReadTime, cleanTitle, formatSummary, getTodayDateIST } from '../utils.js';
+import { cleanUrl, extractReadTime, cleanTitle, formatSummary, getTodayDateSF, sleep } from '../utils.js';
 
 dotenv.config();
 
@@ -36,7 +36,7 @@ function makeEmbed(title, summary, url, category) {
       }
     ],
     footer: {
-      text: `${config.emoji} ${config.name} • ${getTodayDateIST()}`
+      text: `${config.emoji} ${config.name} • ${getTodayDateSF()}`
     },
     timestamp: new Date().toISOString()
   };
@@ -49,6 +49,7 @@ export async function postCategoryHeader(category, dateStr) {
     username: config.name,
     avatar_url: "https://tldr.tech/logo-jpg.jpg"
   });
+  await sleep(1000);
 }
 
 export async function postArticle(title, summary, url, category) {
@@ -58,4 +59,5 @@ export async function postArticle(title, summary, url, category) {
     username: config.name,
     avatar_url: "https://tldr.tech/logo-jpg.jpg"
   });
+  await sleep(1500);
 } 
