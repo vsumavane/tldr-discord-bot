@@ -1,16 +1,9 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import dotenv from "dotenv";
 import { CATEGORY_CONFIG } from './config.js';
 import { getTodayDateIST } from './utils.js';
 import { getPostedCategories, markCategoryAsPosted } from './services/storage.js';
 import { postCategoryHeader, postArticle } from './services/discord.js';
-
-dotenv.config();
-
-const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
-const KV_STORE_URL = process.env.KV_STORE_URL; // Vercel KV store URL
-const KV_STORE_TOKEN = process.env.KV_STORE_TOKEN;
 
 function cleanUrl(url) {
   try {
