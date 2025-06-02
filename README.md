@@ -31,6 +31,22 @@ KV_REST_API_TOKEN=your-kv-rest-api-token
 - `KV_REST_API_URL`: Your Upstash KV (Vercel KV) store REST API URL for tracking posted categories
 - `KV_REST_API_TOKEN`: Your Upstash KV (Vercel KV) store REST API authentication token
 
+## Running the Project
+
+### Local Development
+
+To run the project locally for development and testing, ensure you have your `.env` file configured and run:
+
+```bash
+npm run dev
+```
+
+This will execute the serverless function using Node.js and load environment variables from your `.env` file.
+
+### Production (Vercel)
+
+For production, the project is deployed as a serverless function on Vercel. It is designed to be triggered by a Vercel Cron Job on an hourly schedule. Follow the deployment steps below to set this up.
+
 ## Deployment
 
 1. Deploy to Vercel:
