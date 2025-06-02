@@ -18,9 +18,9 @@ A Discord bot that posts TLDR newsletters to your server.
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your-webhook-url
 
 # Required: Upstash KV (Vercel KV) Store Configuration
-# Create a KV store in your Vercel project: Storage -> KV -> Create
-KV_STORE_URL=https://your-kv-store-url
-KV_STORE_TOKEN=your-kv-store-token
+# Get these values from your Vercel project settings after creating a KV store (Storage -> KV)
+KV_REST_API_URL=https://your-kv-rest-api-url
+KV_REST_API_TOKEN=your-kv-rest-api-token
 ```
 
 ## Environment Variables
@@ -28,8 +28,8 @@ KV_STORE_TOKEN=your-kv-store-token
 ### Required Variables
 
 - `DISCORD_WEBHOOK_URL`: The webhook URL for your Discord server where the newsletters will be posted
-- `KV_STORE_URL`: Your Vercel KV store URL for tracking posted categories
-- `KV_STORE_TOKEN`: Your Vercel KV store authentication token
+- `KV_REST_API_URL`: Your Upstash KV (Vercel KV) store REST API URL for tracking posted categories
+- `KV_REST_API_TOKEN`: Your Upstash KV (Vercel KV) store REST API authentication token
 
 ## Deployment
 
