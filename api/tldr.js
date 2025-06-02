@@ -1,5 +1,3 @@
-console.log('Script execution started - Raw Console Log');
-
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { CATEGORY_CONFIG } from './config.js';
@@ -145,7 +143,6 @@ export default async function handler(req, res) {
     Logger.info("Weekend – no newsletters to post.");
     return res.status(200).send("Weekend – no newsletters.");
   }
-  Logger.info(`Today's date (SF time): ${dateStr}`);
 
   const postedCategories = await getPostedCategories(dateStr); // Pass dateStr here
   Logger.info(`Fetched already posted categories: ${JSON.stringify(postedCategories)}`);
