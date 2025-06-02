@@ -38,33 +38,23 @@ KV_REST_API_TOKEN=your-kv-rest-api-token
 To run the project locally for development and testing, ensure you have your `.env` file configured and run:
 
 ```bash
-npm run dev
+node api/tldr.js
 ```
 
-This will execute the serverless function using Node.js and load environment variables from your `.env` file.
+### GitHub Actions Deployment
 
-### Production (Vercel)
+The project uses GitHub Actions to run the bot hourly. Follow these steps to set it up:
 
-For production, the project is deployed as a serverless function on Vercel. It is designed to be triggered by a Vercel Cron Job on an hourly schedule. Follow the deployment steps below to set this up.
+1. Fork this repository to your GitHub account
 
-## Deployment
+2. Add the following secrets to your repository (Settings -> Secrets and variables -> Actions):
+   - `DISCORD_WEBHOOK_URL`: Your Discord webhook URL
+   - `KV_REST_API_URL`: Your Upstash KV REST API URL
+   - `KV_REST_API_TOKEN`: Your Upstash KV REST API token
 
-1. Deploy to Vercel:
-   ```bash
-   vercel
-   ```
+3. The GitHub Actions workflow will automatically run every hour and post new TLDR newsletters to your Discord server.
 
-2. Set up environment variables in your Vercel project settings
-
-3. Configure a cron job to run the function hourly:
-   ```json
-   {
-     "crons": [{
-       "path": "/api/tldr",
-       "schedule": "0 * * * *"
-     }]
-   }
-   ```
+You can also manually trigger the workflow from the "Actions" tab in your repository.
 
 ## Features
 
