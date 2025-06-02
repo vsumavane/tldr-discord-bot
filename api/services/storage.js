@@ -1,5 +1,7 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import Logger from '../utils/logger.js';
+
 dotenv.config();
 
 const KV_REST_API_URL = process.env.KV_REST_API_URL;
@@ -11,9 +13,10 @@ export async function getPostedCategories() {
     const response = await axios.get(`${KV_REST_API_URL}/posted_categories`, {
       headers: { Authorization: `Bearer ${KV_REST_API_TOKEN}` }
     });
+    Logger.info('Successfully fetched posted categories from Upstash KV.');
     return response.data || [];
   } catch (error) {
-    console.error('Error fetching posted categories from Upstash KV:', error);
+    Logger.error('Error fetching posted categories from Upstash KV:', error);
     return [];
   }
 }
@@ -26,7 +29,8 @@ export async function markCategoryAsPosted(category, date) {
       { key, value: true },
       { headers: { Authorization: `Bearer ${KV_REST_API_TOKEN}` } }
     );
+    Logger.info(`Successfully marked category ${category} as posted in Upstash KV for date ${date}.`);
   } catch (error) {
-    console.error('Error marking category as posted in Upstash KV:', error);
+    Logger.error(`Error marking category ${category} as posted in Upstash KV for date ${date}:`, error);
   }
 } 

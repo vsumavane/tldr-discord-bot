@@ -4,6 +4,7 @@ import { CATEGORY_CONFIG } from './config.js';
 import { getTodayDateIST } from './utils.js';
 import { getPostedCategories, markCategoryAsPosted } from './services/storage.js';
 import { postCategoryHeader, postArticle } from './services/discord.js';
+import Logger from './utils/logger.js';
 
 function cleanUrl(url) {
   try {
@@ -78,6 +79,7 @@ function makeEmbed(title, summary, url, category) {
 }
 
 async function checkAndPostCategory(category, dateStr) {
+  Logger.info(`Checking category: ${category} for date: ${dateStr}`);
   const url = `https://tldr.tech/${category}/${dateStr}`;
   
   try {
@@ -89,6 +91,7 @@ async function checkAndPostCategory(category, dateStr) {
     });
 
     if (response.request.res.responseUrl.includes('/' + category + '/')) {
+      Logger.info(`News found for category: ${category}`);
       const $ = cheerio.load(response.data);
       const articles = $("article");
 
@@ -101,38 +104,56 @@ async function checkAndPostCategory(category, dateStr) {
         const link = $(el).find("a").attr("href") || "";
         const summary = $(el).find(".newsletter-html").text().trim();
 
-        if (!title || !summary || !link || link.includes("sponsor")) continue;
+        if (!title || !summary || !link || link.includes("sponsor")) {
+          Logger.warn(`Skipping article due to missing info or sponsor link: ${title}`);
+          continue;
+        }
 
         await postArticle(title, summary, link, category);
         posted++;
+        Logger.info(`Posted article: ${title} for category: ${category}`);
       }
 
       if (posted > 0) {
         await markCategoryAsPosted(category, dateStr);
+        Logger.info(`Finished posting ${posted} articles for category: ${category}. Marked as posted.`);
         return posted;
+      } else {
+        Logger.info(`No articles to post for category: ${category}`);
       }
+    } else {
+      Logger.info(`No news released yet for category: ${category}. Redirected to homepage.`);
     }
     return 0;
   } catch (err) {
-    console.error(`Failed for ${category}:`, err.message);
+    Logger.error(`Failed to check or post for ${category}:`, err.message);
     return 0;
   }
 }
 
 export default async function handler(req, res) {
+  Logger.info('Starting TLDR Discord Bot execution.');
   const dateStr = getTodayDateIST();
-  if (!dateStr) return res.status(200).send("Weekend – no newsletters.");
+  if (!dateStr) {
+    Logger.info("Weekend – no newsletters to post.");
+    return res.status(200).send("Weekend – no newsletters.");
+  }
+  Logger.info(`Today's date (IST): ${dateStr}`);
 
   const postedCategories = await getPostedCategories();
+  Logger.info(`Fetched already posted categories: ${JSON.stringify(postedCategories)}`);
   const postedToday = postedCategories.filter(cat => cat.startsWith(dateStr));
+  Logger.info(`Categories already posted today: ${JSON.stringify(postedToday)}`);
   
   const categoriesToCheck = Object.keys(CATEGORY_CONFIG).filter(
     category => !postedToday.includes(`${dateStr}_${category}`)
   );
 
   if (categoriesToCheck.length === 0) {
+    Logger.info("All categories for today have been posted.");
     return res.status(200).send("All categories for today have been posted.");
   }
+  Logger.info(`Categories to check today: ${JSON.stringify(categoriesToCheck)}`);
 
   let totalPosted = 0;
   for (const category of categoriesToCheck) {
@@ -140,5 +161,6 @@ export default async function handler(req, res) {
     totalPosted += posted;
   }
 
-  res.status(200).send(`Posted ${totalPosted} new TLDR articles. ${categoriesToCheck.length - totalPosted} categories still pending.`);
+  Logger.info(`Total new TLDR articles posted today: ${totalPosted}.`);
+  res.status(200).send(`Posted ${totalPosted} new TLDR articles. ${categoriesToCheck.length - (totalPosted > 0 ? categoriesToCheck.length : 0)} categories still pending.`);
 }
