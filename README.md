@@ -17,7 +17,7 @@ A Discord bot that posts TLDR newsletters to your server.
 # Create a webhook in your Discord server: Server Settings -> Integrations -> Webhooks -> New Webhook
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your-webhook-url
 
-# Required: Vercel KV Store Configuration
+# Required: Upstash KV (Vercel KV) Store Configuration
 # Create a KV store in your Vercel project: Storage -> KV -> Create
 KV_STORE_URL=https://your-kv-store-url
 KV_STORE_TOKEN=your-kv-store-token
@@ -53,7 +53,7 @@ KV_STORE_TOKEN=your-kv-store-token
 ## Features
 
 - Posts TLDR newsletters to Discord
-- Tracks posted categories to avoid duplicates
+- Tracks posted categories to avoid duplicates (using Upstash KV)
 - Handles redirects when news isn't released yet
 - Posts each article as a separate message
 - Includes read time and category information
