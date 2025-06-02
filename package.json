@@ -7,7 +7,7 @@
   "type": "module",
   "main": "api/tldr.js",
   "scripts": {
-    "dev": "node --loader=dotenv/config api/tldr.js",
+    "dev": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"dotenv/config\", pathToFileURL(\".//\"));' api/tldr.js",
     "start": "node api/tldr.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
