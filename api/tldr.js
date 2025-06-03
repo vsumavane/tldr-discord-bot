@@ -106,7 +106,7 @@ async function checkAndPostCategory(category, dateStr) {
         const link = $(el).find("a").attr("href") || "";
         const summary = $(el).find(".newsletter-html").text().trim();
 
-        if (!title || !summary || !link || link.includes("sponsor")) {
+        if (!title || !summary || !link || link.includes("sponsor") || title.includes("(Sponsor)")) {
           Logger.warn(`Skipping article due to missing info or sponsor link: ${title}`);
           continue;
         }
