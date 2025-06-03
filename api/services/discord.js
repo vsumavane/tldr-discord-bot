@@ -18,10 +18,30 @@ async function makeEmbed(title, summary, url, category) {
   const metadata = await fetchUrlMetadata(cleanLink);
   const domain = new URL(cleanLink).hostname.replace('www.', '');
   
-  // Create the main embed
+  // Get article publication date from metadata or use current date as fallback
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  // Try to get article publication time from metadata
+  let timeStr = "";
+  if (metadata?.publishedTime) {
+    const pubDate = new Date(metadata.publishedTime);
+    timeStr = pubDate.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  }
+  
+  // Create the main embed with newspaper styling
   const embed = {
-    title: cleanTitleText,
-    description: formattedSummary,
+    title: `📰 ${cleanTitleText}`,
+    description: `*${formattedSummary}*\n\n**Read the full story:** [${metadata?.siteName || domain}](${cleanLink})`,
     url: cleanLink,
     color: config.color,
     author: {
@@ -30,21 +50,15 @@ async function makeEmbed(title, summary, url, category) {
     },
     fields: [
       {
-        name: "🔗 Source",
-        value: `[${metadata?.siteName || domain}](${cleanLink})`,
-        inline: true
-      },
-      {
-        name: "⏱️ Read Time",
-        value: readTime ? `${readTime} minutes` : "N/A",
-        inline: true
+        name: "‎",  // Empty name for spacing
+        value: timeStr ? `${readTime ? `**${readTime} min read** • ` : ''}${timeStr}` : (readTime ? `**${readTime} min read**` : ''),
+        inline: false
       }
     ],
     footer: {
-      text: `${getTodayDateSF()} • TLDR Newsletter`,
+      text: `TLDR Newsletter • ${getTodayDateSF()}`,
       icon_url: "https://tldr.tech/logo-jpg.jpg"
-    },
-    timestamp: new Date().toISOString()
+    }
   };
 
   // Add image if available
@@ -55,7 +69,7 @@ async function makeEmbed(title, summary, url, category) {
   }
 
   // Add thumbnail for site favicon if available
-  const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+  const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
   embed.thumbnail = {
     url: faviconUrl
   };
