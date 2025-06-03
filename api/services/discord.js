@@ -7,12 +7,36 @@ dotenv.config();
 
 const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
+// Content type detection and styling
+function detectContentType(title) {
+  const contentTypes = {
+    'github repo': { emoji: '🧑‍💻', color: 0x24292e, style: 'github' },
+    'book': { emoji: '📚', color: 0x8B4513, style: 'book' },
+    'tool': { emoji: '🛠️', color: 0x2ECC71, style: 'tool' }
+  };
+
+  for (const [type, config] of Object.entries(contentTypes)) {
+    if (title.toLowerCase().includes(`(${type})`)) {
+      return {
+        type,
+        ...config,
+        cleanTitle: title.replace(`(${type})`, '').trim()
+      };
+    }
+  }
+
+  return null;
+}
+
 async function makeEmbed(title, summary, url, category) {
   const config = CATEGORY_CONFIG[category];
   const cleanLink = cleanUrl(url);
   const readTime = extractReadTime(title);
-  const cleanTitleText = cleanTitle(title);
   const formattedSummary = formatSummary(summary);
+  
+  // Detect content type and get styling
+  const contentType = detectContentType(title);
+  const cleanTitleText = contentType ? contentType.cleanTitle : cleanTitle(title);
   
   // Fetch metadata for rich preview
   const metadata = await fetchUrlMetadata(cleanLink);
@@ -37,13 +61,15 @@ async function makeEmbed(title, summary, url, category) {
       hour12: true
     });
   }
-  
-  // Create the main embed with newspaper styling
+
+  // Base embed configuration
   const embed = {
-    title: `📰 ${cleanTitleText}`,
-    description: `*${formattedSummary}*\n\n**Read the full story:** [${metadata?.siteName || domain}](${cleanLink})`,
+    title: contentType ? `${contentType.emoji} ${cleanTitleText}` : `📰 ${cleanTitleText}`,
+    description: contentType?.style === 'github' 
+      ? `*${formattedSummary}*\n\n**View on GitHub:** [${cleanTitleText}](${cleanLink})`
+      : `*${formattedSummary}*\n\n**Read the full story:** [${metadata?.siteName || domain}](${cleanLink})`,
     url: cleanLink,
-    color: config.color,
+    color: contentType ? contentType.color : config.color,
     author: {
       name: `${config.emoji} ${config.name}`,
       icon_url: "https://tldr.tech/logo-jpg.jpg"
@@ -61,18 +87,50 @@ async function makeEmbed(title, summary, url, category) {
     }
   };
 
-  // Add image if available
-  if (metadata?.image) {
-    embed.image = {
-      url: metadata.image
+  // Special handling for different content types
+  if (contentType) {
+    switch (contentType.style) {
+      case 'github':
+        // GitHub-style embed
+        embed.color = 0x24292e; // GitHub dark theme color
+        embed.thumbnail = {
+          url: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png'
+        };
+        
+        // Add repository avatar if available
+        if (metadata?.image) {
+          // Add the repository avatar as an image
+          embed.image = {
+            url: metadata.image
+          };
+        }
+        break;
+      case 'book':
+        // Book-style embed with cover image
+        if (metadata?.image) {
+          embed.image = {
+            url: metadata.image
+          };
+        }
+        break;
+      case 'tool':
+        // Tool-style embed
+        embed.thumbnail = {
+          url: 'https://www.google.com/s2/favicons?domain=' + domain + '&sz=32'
+        };
+        break;
+    }
+  } else {
+    // Default embed behavior
+    if (metadata?.image) {
+      embed.image = {
+        url: metadata.image
+      };
+    }
+    embed.thumbnail = {
+      url: `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
     };
   }
-
-  // Add thumbnail for site favicon if available
-  const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
-  embed.thumbnail = {
-    url: faviconUrl
-  };
 
   return embed;
 }
