@@ -69,7 +69,7 @@ function makeEmbed(title, summary, url, category) {
       },
       {
         name: "⏱️ Read Time",
-        value: readTime ? `${readTime} minutes` : "N/A",
+        value: readTime ? `${readTime} minutes` : "",
         inline: true
       }
     ],
