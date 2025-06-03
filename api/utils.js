@@ -97,7 +97,13 @@ export async function fetchUrlMetadata(url) {
              $('meta[property="og:image:secure_url"]').attr('content') || 
              $('meta[name="twitter:image:src"]').attr('content') || '',
       siteName: $('meta[property="og:site_name"]').attr('content') || 
-                new URLParse(url).hostname.replace('www.', '')
+                new URLParse(url).hostname.replace('www.', ''),
+      publishedTime: $('meta[property="article:published_time"]').attr('content') ||
+                    $('meta[name="pubdate"]').attr('content') ||
+                    $('meta[name="publishdate"]').attr('content') ||
+                    $('meta[name="date"]').attr('content') ||
+                    $('time[datetime]').attr('datetime') ||
+                    $('time[pubdate]').attr('datetime')
     };
 
     // Clean up the metadata
