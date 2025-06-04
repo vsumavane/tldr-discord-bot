@@ -106,8 +106,14 @@ async function checkAndPostCategory(category, dateStr) {
         const link = $(el).find("a").attr("href") || "";
         const summary = $(el).find(".newsletter-html").text().trim();
 
-        if (!title || !summary || !link || link.includes("sponsor") || title.includes("(Sponsor)")) {
-          Logger.warn(`Skipping article due to missing info or sponsor link: ${title}`);
+        // Skip if missing info, sponsor link, or TLDR hiring/advertising
+        if (!title || !summary || !link || 
+            link.includes("sponsor") || 
+            title.includes("(Sponsor)") ||
+            (link.startsWith("mailto:") && summary.toLowerCase().includes("hiring")) ||
+            (link.startsWith("mailto:") && summary.toLowerCase().includes("join our team")) ||
+            (link.startsWith("mailto:") && summary.toLowerCase().includes("we're hiring"))) {
+          Logger.warn(`Skipping article due to missing info, sponsor link, or TLDR hiring post: ${title}`);
           continue;
         }
 
