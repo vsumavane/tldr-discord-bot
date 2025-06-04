@@ -106,13 +106,20 @@ async function checkAndPostCategory(category, dateStr) {
         const link = $(el).find("a").attr("href") || "";
         const summary = $(el).find(".newsletter-html").text().trim();
 
+        // Extract repeated checks
+        const isEmail = link.startsWith("mailto:");
+        const lowerSummary = summary.toLowerCase();
+        const isHiringPost = isEmail && (
+            lowerSummary.includes("hiring") ||
+            lowerSummary.includes("join our team") ||
+            lowerSummary.includes("we're hiring")
+        );
+
         // Skip if missing info, sponsor link, or TLDR hiring/advertising
         if (!title || !summary || !link || 
             link.includes("sponsor") || 
             title.includes("(Sponsor)") ||
-            (link.startsWith("mailto:") && summary.toLowerCase().includes("hiring")) ||
-            (link.startsWith("mailto:") && summary.toLowerCase().includes("join our team")) ||
-            (link.startsWith("mailto:") && summary.toLowerCase().includes("we're hiring"))) {
+            isHiringPost) {
           Logger.warn(`Skipping article due to missing info, sponsor link, or TLDR hiring post: ${title}`);
           continue;
         }
