@@ -1,4 +1,4 @@
-# TLDR Discord Bot
+# TLDR NEWS Discord Bot
 
 A Discord bot that posts TLDR newsletters to your server.
 
